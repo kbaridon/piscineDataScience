@@ -1,0 +1,12 @@
+services:
+  postgres:
+    build:
+      context: ./requirements/postgreSQL
+    container_name: postgreSQL
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
