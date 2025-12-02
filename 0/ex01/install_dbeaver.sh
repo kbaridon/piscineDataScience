@@ -19,6 +19,8 @@ if [ ! -d "$DB_DIR" ]; then
     mv "$DEST/$EXTRACTED" "$DB_DIR"
 fi
 
+rm "$DEST/dbeaver.tar.gz"
+
 echo "🚀 Lancement de DBeaver..."
 "$DB_DIR/dbeaver" &
 
