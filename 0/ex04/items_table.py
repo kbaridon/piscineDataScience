@@ -8,10 +8,10 @@ import os
 
 
 def main():
-    """Take a path to a folder.
-    Create tables out of every data_*.csv files"""
+    """Take a path to a folder that contains item.csv.
+    Create the table out of the file."""
 
-    host = "localhost:5432"  # Hard-coded (docker)
+    host = "localhost:5432"  # Hard-coded (Dockerfile)
     load_dotenv("./srcs/.env")
     user = os.getenv('POSTGRES_USER')
     pwd = os.getenv('POSTGRES_PASSWORD')
@@ -22,7 +22,7 @@ def main():
         return
 
     if len(sys.argv) != 2:
-        print("Usage: python3 automatic_table.py folder/")
+        print("Usage: python3 items_table.py folder/")
         return
 
     folderPath = sys.argv[1]
@@ -34,28 +34,25 @@ def main():
         print(f"SQL Error: {e}")
         return
 
-    search_path = os.path.join(folderPath, "data_*.csv")
+    search_path = os.path.join(folderPath, "item.csv")
     files = glob.glob(search_path)
-    files.sort()
 
     if not files:
-        print("No files found.")
+        print("item.csv not found.")
         return
 
     for file_path in files:
         basename = os.path.basename(file_path)
-        table_name = basename.rsplit('.', 1)[0]
+        table_name = "items"
 
         print(f"\n📂 Working on {basename} -> Table: {table_name}")
 
         create_table_query = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
-            event_time timestamptz,
-            event_type text,
             product_id integer,
-            price decimal(10,2),
-            user_id bigint,
-            user_session uuid
+            category_id bigint,
+            category_code text,
+            brand text
         );
         """
 
@@ -64,7 +61,7 @@ def main():
                 connection.execute(text(create_table_query))
                 connection.commit()
             print(f"   ↳ Table '{table_name}' exists",
-                  "has been created or was already here).")
+                  "(has been created or was already here).")
         except Exception as e:
             print(f"❌ Error while creating the table : {e}")
             continue
@@ -72,9 +69,6 @@ def main():
         try:
             print("   ↳ Reading the CSV...")
             df = pd.read_csv(file_path, na_values=[''])
-
-            df['user_session'] = df['user_session'].where(
-                pd.notnull(df['user_session']), None)
 
             chunksize = 10000
             total_rows = len(df)
