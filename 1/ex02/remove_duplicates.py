@@ -53,11 +53,11 @@ def main():
     """Take a path the a folder full of csv.
     Add the CSV in a customer table in postgreSQL"""
 
-    if len(sys.argv) != 2:
-        print("Usage: python3 remove_duplicates.py table")
+    if len(sys.argv) != 1:
+        print("Usage: python3 remove_duplicates.py")
         return
 
-    table = sys.argv[1]
+    table = "customers"
     try:
         engine = connect_db()
     except (KeyboardInterrupt, Exception) as e:
